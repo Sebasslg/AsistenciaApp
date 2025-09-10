@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "root",
-    "password": 25082003,
-    "database": "asistencia_db",
+    "password": "25082003",
+    "database": "asistencia_app",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
