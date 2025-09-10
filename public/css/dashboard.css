@@ -1,0 +1,258 @@
+/* ===================== GENERAL ===================== */
+/* Fondo y fuente principal */
+body {
+    background-color: #f4f6f9 !important;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    color: #212529 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* Espaciado superior en el contenedor principal */
+.container {
+    padding-top: 2rem !important;
+}
+
+/* ===================== SCROLLBAR PERSONALIZADO ===================== */
+::-webkit-scrollbar {
+    width: 8px !important;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+}
+::-webkit-scrollbar-thumb {
+    background: #888 !important;
+    border-radius: 6px !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555 !important;
+}
+
+/* ===================== NAVBAR ===================== */
+/* Barra superior con gradiente y sombra */
+.navbar {
+    background: linear-gradient(90deg, #343a40, #212529) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15) !important;
+}
+
+/* Marca de la app en la navbar */
+.navbar .navbar-brand {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    font-size: 1.2rem !important;
+    letter-spacing: 0.5px !important;
+}
+.navbar .navbar-brand i {
+    margin-right: 6px !important;
+    color: #0dcaf0 !important;
+}
+
+/* Botón de cerrar sesión */
+#logout-btn {
+    border-radius: 30px !important;
+    font-weight: 500 !important;
+    padding: 0.4rem 1.2rem !important;
+    transition: all 0.25s ease !important;
+}
+#logout-btn:hover {
+    background-color: #e03131 !important;
+    transform: scale(1.05) !important;
+}
+
+/* ===================== TITULOS ===================== */
+/* Tipografía y colores para títulos */
+h1, h2, h4 {
+    font-family: "Poppins", sans-serif !important;
+}
+h1 {
+    font-weight: 700 !important;
+    font-size: 2.2rem !important;
+    margin-bottom: 1rem !important;
+    color: #222 !important;
+}
+h2 {
+    font-weight: 600 !important;
+    font-size: 1.6rem !important;
+    margin-bottom: 1rem !important;
+}
+h4 {
+    font-weight: 500 !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* ===================== CARDS ===================== */
+/* Tarjetas con sombra y bordes redondeados */
+.card {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08) !important;
+    background-color: #fff !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.12) !important;
+}
+/* Encabezado de las cards */
+.card-header {
+    background: linear-gradient(90deg, #495057, #343a40) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    border-top-left-radius: 16px !important;
+    border-top-right-radius: 16px !important;
+}
+
+/* ===================== BOTONES ===================== */
+/* Botones generales */
+.btn {
+    border-radius: 10px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Botón de entrada */
+#entrada-btn {
+    background: linear-gradient(90deg, #198754, #20c997) !important;
+    border: none !important;
+}
+#entrada-btn:hover {
+    transform: scale(1.05) !important;
+    background: #157347 !important;
+}
+
+/* Botón de salida */
+#salida-btn {
+    background: linear-gradient(90deg, #ffc107, #ffcd39) !important;
+    border: none !important;
+    color: #212529 !important;
+}
+#salida-btn:hover {
+    transform: scale(1.05) !important;
+    background: #e0a800 !important;
+}
+
+/* Botones de reportes */
+#reporte-atrasos-btn {
+    background: #0d6efd !important;
+    color: #fff !important;
+}
+#reporte-salidas-btn {
+    background: #ffc107 !important;
+    color: #212529 !important;
+}
+#reporte-inasistencias-btn {
+    background: #dc3545 !important;
+    color: #fff !important;
+}
+#reporte-atrasos-btn:hover, 
+#reporte-salidas-btn:hover, 
+#reporte-inasistencias-btn:hover {
+    transform: translateY(-3px) !important;
+}
+
+/* ===================== LIST GROUP ===================== */
+/* Estilo para listas tipo Bootstrap */
+.list-group-item {
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem !important;
+    border: 1px solid #dee2e6 !important;
+    transition: all 0.25s ease !important;
+}
+.list-group-item:hover {
+    transform: translateX(6px) !important;
+    background-color: #e9f7ff !important;
+    border-left: 4px solid #0d6efd !important;
+}
+
+/* ===================== TABLAS ===================== */
+/* Tablas con bordes y hover */
+.table {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    background-color: #fff !important;
+    font-size: 0.95rem !important;
+}
+.table thead {
+    background: #212529 !important;
+    color: #fff !important;
+}
+.table-hover tbody tr:hover {
+    background-color: #f1f3f5 !important;
+    cursor: pointer !important;
+}
+.table tbody tr {
+    background-color: #fff !important;
+    color: #212529 !important;
+}
+
+/* ===================== BADGES ===================== */
+/* Etiquetas de colores para estados */
+.badge {
+    font-size: 0.8rem !important;
+    padding: 0.4em 0.65em !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+}
+.badge-success {
+    background: linear-gradient(90deg, #28a745, #20c997) !important;
+}
+.badge-warning {
+    background: linear-gradient(90deg, #ffc107, #ffcd39) !important;
+    color: #212529 !important;
+}
+.badge-danger {
+    background: linear-gradient(90deg, #dc3545, #f03e3e) !important;
+}
+
+/* ===================== MODALS ===================== */
+/* Ventanas modales con animación y bordes */
+.modal-content {
+    border-radius: 14px !important;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.25) !important;
+    animation: fadeIn 0.3s ease-out !important;
+}
+.modal-header {
+    background: linear-gradient(90deg, #495057, #212529) !important;
+    color: #fff !important;
+    border-top-left-radius: 14px !important;
+    border-top-right-radius: 14px !important;
+}
+.modal-footer .btn {
+    border-radius: 8px !important;
+}
+
+/* ===================== REPORTES ===================== */
+/* Visibilidad y estilo para salidas anticipadas */
+#salidas-anticipadas {
+    display: block !important;
+    background-color: #fff3cd !important;
+    color: #856404 !important;
+    border: 1px solid #ffeeba !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* ===================== ANIMACIONES ===================== */
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* ===================== RESPONSIVIDAD ===================== */
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem !important;
+    }
+    #entrada-btn, #salida-btn {
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+    .navbar .navbar-brand {
+        font-size: 1rem !important;
+    }
+}

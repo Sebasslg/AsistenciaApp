@@ -1,0 +1,110 @@
+/* ======= ESTILOS GENERALES DEL BODY ======= */
+body {
+    background-color: #f5f5f5 !important; /* Fondo gris muy claro */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 100vh !important;
+    margin: 0 !important;
+}
+
+/* ======= CONTENEDOR PRINCIPAL ======= */
+.container.d-flex.justify-content-center.align-items-center.vh-100 {
+    width: 100% !important;
+    max-width: 420px !important;
+    padding: 1rem !important;
+}
+
+/* ======= CARD DE LOGIN ======= */
+.container .card {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+    background-color: #ffffff !important;
+    padding: 2rem !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Efecto hover en la card */
+.container .card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ======= TITULO DEL LOGIN ======= */
+.container .card-title {
+    color: #212529 !important; /* Negro suave */
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    text-align: center !important;
+}
+
+/* ======= LABELS DE LOS INPUTS ======= */
+.container .form-label {
+    color: #495057 !important; /* Gris oscuro */
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* ======= INPUTS DEL FORMULARIO ======= */
+.container .form-control {
+    border-radius: 12px !important;
+    border: 1px solid #ced4da !important;
+    padding: 0.75rem !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    background-color: #fdfdfd !important;
+    color: #212529 !important;
+}
+
+/* Efecto focus en los inputs */
+.container .form-control:focus {
+    border-color: #495057 !important;
+    box-shadow: 0 0 0 0.25rem rgba(73, 80, 87, 0.15) !important;
+    outline: none !important;
+}
+
+/* ======= BOTÓN PRINCIPAL ======= */
+.container .btn-primary {
+    background-color: #495057 !important; /* Gris oscuro */
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    padding: 0.75rem !important;
+    width: 100% !important;
+    transition: all 0.3s ease !important;
+    color: #ffffff !important;
+}
+
+/* Efecto hover en el botón */
+.container .btn-primary:hover {
+    background-color: #343a40 !important; /* Gris más oscuro */
+    transform: translateY(-2px) !important;
+}
+
+/* ======= MENSAJE DE ERROR ======= */
+.container #error-message {
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    color: #dc3545 !important; /* Rojo sobrio para errores */
+    margin-top: 1rem !important;
+    text-align: center !important;
+}
+
+/* ======= RESPONSIVIDAD ======= */
+@media (max-width: 500px) {
+    .container .card {
+        padding: 1.5rem !important;
+    }
+
+    .container .card-title {
+        font-size: 1.25rem !important;
+    }
+
+    .container .form-control {
+        font-size: 0.95rem !important;
+        padding: 0.65rem !important;
+    }
+}
