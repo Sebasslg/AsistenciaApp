@@ -1,11 +1,16 @@
 // -------------------- IMPORTS --------------------
 const express = require('express');
 const path = require('path');
-const { User, sequelize } = require('./models'); // Modelo y instancia de Sequelize
+const { User, Attendance, sequelize, Sequelize } = require('./models');
+const { Op } = Sequelize; // <-- Agrega esto
 
 // -------------------- CONFIGURACIÓN --------------------
 const app = express();
 const port = 3004;
+
+// Horarios configurables según requerimientos
+const ENTRY_LIMIT = '09:30:00'; // Atrasos después de las 09:30
+const EXIT_LIMIT = '17:30:00';  // Salidas antes de las 17:30
 
 // Middleware para servir archivos estáticos (CSS, JS, Bootstrap)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -115,46 +120,135 @@ app.delete('/api/users/:id', async (req, res) => {
 
 // -------------------- RUTAS REPORTES --------------------
 
-// Reporte de Entradas Atrasadas
+// Reporte de Entradas Atrasadas (RE-01)
 app.get('/api/reports/late-entries', async (req, res) => {
     try {
-        // Simulación de datos
-        const simulatedData = [
-            { userId: 1, email: 'empleado1@empresa.com', entryTime: '2025-09-10T09:45:00Z' },
-            { userId: 2, email: 'empleado2@empresa.com', entryTime: '2025-09-10T10:05:00Z' },
-        ];
-        res.json(simulatedData);
+        const today = new Date().toISOString().slice(0, 10);
+        const entryLimit = new Date(`${today}T${ENTRY_LIMIT}`);
+        const lateEntries = await Attendance.findAll({
+            where: {
+                type: 'entrada',
+                timestamp: {
+                    [Op.gt]: entryLimit
+                }
+            },
+            include: [{ model: User, as: 'user', attributes: ['id', 'email'] }]
+        });
+
+        const result = lateEntries.map(a => ({
+            userId: a.user.id,
+            email: a.user.email,
+            entryTime: a.timestamp
+        }));
+
+        res.json(result);
     } catch (error) {
-        console.error('Error generando reporte de atrasos:', error);
         res.status(500).json({ success: false, message: 'Error al generar reporte de atrasos' });
     }
 });
 
-// Reporte de Salidas Anticipadas
+// Reporte de Salidas Anticipadas (RE-02)
 app.get('/api/reports/early-exits', async (req, res) => {
     try {
-        // Simulación de datos
-        const simulatedData = [
-            { userId: 1, email: 'empleado1@empresa.com', exitTime: '2025-09-10T17:15:00Z' },
-        ];
-        res.json(simulatedData);
+        const today = new Date().toISOString().slice(0, 10);
+        const exitLimit = new Date(`${today}T${EXIT_LIMIT}`);
+        const earlyExits = await Attendance.findAll({
+            where: {
+                type: 'salida',
+                timestamp: {
+                    [Op.lt]: exitLimit
+                }
+            },
+            include: [{ model: User, as: 'user', attributes: ['id', 'email'] }]
+        });
+
+        const result = earlyExits.map(a => ({
+            userId: a.user.id,
+            email: a.user.email,
+            exitTime: a.timestamp
+        }));
+
+        res.json(result);
     } catch (error) {
-        console.error('Error generando reporte de salidas anticipadas:', error);
         res.status(500).json({ success: false, message: 'Error al generar reporte de salidas anticipadas' });
     }
 });
 
-// Reporte de Inasistencias
+// Reporte de Inasistencias (RE-03)
 app.get('/api/reports/absences', async (req, res) => {
     try {
-        // Simulación de datos
-        const simulatedData = [
-            { userId: 3, email: 'empleado3@empresa.com', date: '2025-09-10' },
-        ];
-        res.json(simulatedData);
+        const users = await User.findAll({ attributes: ['id', 'email'], where: { role: 'employee' } });
+        const today = new Date().toISOString().slice(0, 10);
+
+        // Busca quienes no tienen entrada ni salida hoy
+        const attendancesToday = await Attendance.findAll({
+            where: {
+                timestamp: {
+                    [Op.gte]: new Date(`${today}T00:00:00`),
+                    [Op.lt]: new Date(`${today}T23:59:59`)
+                }
+            }
+        });
+
+        const presentUserIds = [...new Set(attendancesToday.map(a => a.userId))];
+        const absents = users.filter(u => !presentUserIds.includes(u.id));
+
+        const result = absents.map(u => ({
+            userId: u.id,
+            email: u.email,
+            date: today
+        }));
+
+        res.json(result);
     } catch (error) {
-        console.error('Error generando reporte de inasistencias:', error);
         res.status(500).json({ success: false, message: 'Error al generar reporte de inasistencias' });
+    }
+});
+
+// ----------- ASISTENCIA -----------
+
+// Registrar asistencia
+app.post('/api/attendance', async (req, res) => {
+    const { email, type } = req.body;
+    try {
+        const user = await User.findOne({ where: { email } });
+        if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+
+        const attendance = await Attendance.create({
+            userId: user.id,
+            type,
+            timestamp: new Date()
+        });
+        res.json({ success: true, attendance });
+    } catch (error) {
+        console.error('Error registrando asistencia:', error);
+        res.status(500).json({ success: false, message: 'Error al registrar asistencia' });
+    }
+});
+
+// Obtener última marca
+app.get('/api/attendance/last/:email', async (req, res) => {
+    const { email } = req.params;
+    try {
+        const user = await User.findOne({ where: { email } });
+        if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+
+        const lastEntry = await Attendance.findOne({
+            where: { userId: user.id, type: 'entrada' },
+            order: [['timestamp', 'DESC']]
+        });
+        const lastExit = await Attendance.findOne({
+            where: { userId: user.id, type: 'salida' },
+            order: [['timestamp', 'DESC']]
+        });
+        res.json({
+            success: true,
+            lastEntry: lastEntry ? lastEntry.timestamp : null,
+            lastExit: lastExit ? lastExit.timestamp : null
+        });
+    } catch (error) {
+        console.error('Error obteniendo última marca:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener última marca' });
     }
 });
 

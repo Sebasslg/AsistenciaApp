@@ -1,30 +1,50 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 
-// Exporta el modelo User para Sequelize
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
-     * Método auxiliar para definir asociaciones entre modelos.
-     * No es parte del ciclo de vida de Sequelize.
-     * El archivo models/index lo llamará automáticamente.
+     * Asociaciones entre modelos
      */
     static associate(models) {
-      // Aquí puedes definir relaciones si es ncesario
+      // Por ejemplo, si luego agregas tabla Attendance
+      // User.hasMany(models.Attendance, { foreignKey: 'userId' });
     }
   }
 
-  // Inicializa el modelo User con los campos email, password y rol
   User.init({
-    email: DataTypes.STRING,      // Correo electrónico del usuario
-    password: DataTypes.STRING,   // Contraseña del usuario
-    role: DataTypes.STRING        // Rol del usuario (admin, empleado)
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: { msg: 'Debe ser un correo válido' }
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: { args: [6, 100], msg: 'La contraseña debe tener al menos 6 caracteres' }
+      }
+    },
+    role: {
+      type: DataTypes.ENUM('admin', 'employee'),
+      allowNull: false,
+      defaultValue: 'employee',
+      validate: {
+        isIn: {
+          args: [['admin', 'employee']],
+          msg: 'El rol debe ser admin o employee'
+        }
+      }
+    }
   }, {
-    sequelize,                    // Instancia de Sequelize
-    modelName: 'User',            // Nombre del modelo
+    sequelize,
+    modelName: 'User',
+    tableName: 'Users', // Nombre explícito de la tabla
+    timestamps: true,   // createdAt y updatedAt
   });
 
-  return User; // Retorna el modelo para usarlo en otras partes de la aplicación
+  return User;
 };

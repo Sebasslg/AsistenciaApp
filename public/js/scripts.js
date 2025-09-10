@@ -128,13 +128,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Actualiza la última marca en la vista
+    async function updateLastMarks(email) {
+        try {
+            const res = await fetch(`/api/attendance/last/${email}`);
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('last-entry').textContent = data.lastEntry
+                    ? new Date(data.lastEntry).toLocaleString()
+                    : 'N/A';
+                document.getElementById('last-exit').textContent = data.lastExit
+                    ? new Date(data.lastExit).toLocaleString()
+                    : 'N/A';
+            }
+        } catch (error) {
+            console.error('Error actualizando últimas marcas:', error);
+        }
+    }
+
     // ===================== ASISTENCIA DEL EMPLEADO =====================
     if (currentUserRole === 'employee') {
         if (entradaBtn) {
             entradaBtn.addEventListener('click', async () => {
                 try {
-                    console.log('Registrando entrada para:', currentUserEmail);
-                    alert('Entrada registrada correctamente.');
+                    const res = await fetch('/api/attendance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: currentUserEmail, type: 'entrada' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('Entrada registrada correctamente.');
+                        updateLastMarks(currentUserEmail);
+                    } else {
+                        alert(data.message || 'Error al registrar entrada.');
+                    }
                 } catch (error) {
                     console.error('Error al registrar entrada:', error);
                     alert('Error al registrar entrada.');
@@ -145,14 +173,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (salidaBtn) {
             salidaBtn.addEventListener('click', async () => {
                 try {
-                    console.log('Registrando salida para:', currentUserEmail);
-                    alert('Salida registrada correctamente.');
+                    const res = await fetch('/api/attendance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: currentUserEmail, type: 'salida' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('Salida registrada correctamente.');
+                        updateLastMarks(currentUserEmail);
+                    } else {
+                        alert(data.message || 'Error al registrar salida.');
+                    }
                 } catch (error) {
                     console.error('Error al registrar salida:', error);
                     alert('Error al registrar salida.');
                 }
             });
         }
+
+        // Actualiza las marcas al cargar la página
+        updateLastMarks(currentUserEmail);
     }
 
     // ===================== GESTIÓN DE USUARIOS (ADMIN) =====================
