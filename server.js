@@ -27,7 +27,7 @@ app.get('/dashboard', (req, res) => {
 
 // -------------------- RUTAS API --------------------
 
-// Autenticación
+// Login
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -42,6 +42,8 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ success: false, message: 'Error del servidor' });
     }
 });
+
+// -------------------- RUTAS USUARIOS (Admin) --------------------
 
 // Obtener todos los usuarios (sin contraseña)
 app.get('/api/users', async (req, res) => {
@@ -61,9 +63,7 @@ app.post('/api/users', async (req, res) => {
     const { email, password, role } = req.body;
     try {
         const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(409).json({ success: false, message: 'El correo electrónico ya está en uso.' });
-        }
+        if (existingUser) return res.status(409).json({ success: false, message: 'El correo electrónico ya está en uso.' });
 
         const newUser = await User.create({ email, password, role });
         const { password: _, ...userWithoutPassword } = newUser.get({ plain: true });
@@ -108,6 +108,48 @@ app.delete('/api/users/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
         res.status(500).json({ success: false, message: 'Error al eliminar el usuario' });
+    }
+});
+
+// -------------------- RUTAS REPORTES --------------------
+
+// Reporte de Entradas Atrasadas (RE-01)
+app.get('/api/reports/late-entries', async (req, res) => {
+    try {
+        const simulatedData = [
+            { userId: 1, email: 'empleado1@empresa.com', entryTime: '2025-09-10T09:45:00Z' },
+            { userId: 2, email: 'empleado2@empresa.com', entryTime: '2025-09-10T10:05:00Z' },
+        ];
+        res.json(simulatedData);
+    } catch (error) {
+        console.error('Error generando reporte de atrasos:', error);
+        res.status(500).json({ success: false, message: 'Error al generar reporte de atrasos' });
+    }
+});
+
+// Reporte de Salidas Anticipadas (RE-02)
+app.get('/api/reports/early-exits', async (req, res) => {
+    try {
+        const simulatedData = [
+            { userId: 1, email: 'empleado1@empresa.com', exitTime: '2025-09-10T17:15:00Z' },
+        ];
+        res.json(simulatedData);
+    } catch (error) {
+        console.error('Error generando reporte de salidas anticipadas:', error);
+        res.status(500).json({ success: false, message: 'Error al generar reporte de salidas anticipadas' });
+    }
+});
+
+// Reporte de Inasistencias (RE-03)
+app.get('/api/reports/absences', async (req, res) => {
+    try {
+        const simulatedData = [
+            { userId: 3, email: 'empleado3@empresa.com', date: '2025-09-10' },
+        ];
+        res.json(simulatedData);
+    } catch (error) {
+        console.error('Error generando reporte de inasistencias:', error);
+        res.status(500).json({ success: false, message: 'Error al generar reporte de inasistencias' });
     }
 });
 
