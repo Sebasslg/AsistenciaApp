@@ -4,27 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Control de Asistencia</title>
+    <!-- Bootstrap CSS -->
     <link href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Estilos personalizados para el login -->
     <link rel="stylesheet" href="/css/login.css">
-</head>
+</head> 
 <body>
+    <!-- ===================== CONTENEDOR PRINCIPAL ===================== -->
     <div class="container d-flex justify-content-center align-items-center vh-100">
+        <!-- ===================== CARD DE LOGIN ===================== -->
         <div class="card p-4 shadow">
+            <!-- Título del formulario -->
             <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+            <!-- ===================== FORMULARIO DE LOGIN ===================== -->
             <form id="login-form">
+                <!-- Campo de correo -->
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo electrónico</label>
                     <input type="email" class="form-control" id="email" name="email" required>
                 </div>
+                <!-- Campo de contraseña -->
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
+                <!-- Botón de enviar -->
                 <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                <!-- Mensaje de error -->
                 <div id="error-message" class="text-danger mt-2 text-center"></div>
             </form>
         </div>
     </div>
+    <!-- ===================== SCRIPTS ===================== -->
     <script src="/js/scripts.js"></script>
 </body>
 </html>

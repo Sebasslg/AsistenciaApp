@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Elementos del DOM ---
+    // ===================== ELEMENTOS DEL DOM =====================
     const loginForm = document.getElementById('login-form');
     const errorMessage = document.getElementById('error-message');
     const logoutBtn = document.getElementById('logout-btn');
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const entradaBtn = document.getElementById('entrada-btn');
     const salidaBtn = document.getElementById('salida-btn');
 
-    // Gestión de Usuarios Modal (si están en dashboard.html)
+    // Modales para gestión de usuarios y reportes
     const usuariosModalElement = document.getElementById('usuariosModal');
     let usuariosModal = null;
     if (usuariosModalElement) {
@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const userFormTitle = document.getElementById('user-form-title');
     const userTableBody = document.getElementById('user-table-body');
 
-    // Reportes Modal (si están en dashboard.html)
     const reportesModalElement = document.getElementById('reportesModal');
     let reportesModal = null;
     if (reportesModalElement) {
@@ -36,11 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const reporteInasistenciasBtn = document.getElementById('reporte-inasistencias-btn');
     const reportOutputDiv = document.getElementById('report-output');
 
-    // --- Variables de Sesión ---
+    // ===================== VARIABLES DE SESIÓN =====================
     let currentUserRole = localStorage.getItem('userRole');
     let currentUserEmail = localStorage.getItem('userEmail');
 
-    // --- Funciones de Ayuda ---
+    // ===================== FUNCIONES DE AYUDA =====================
+    // Formatea fechas para mostrar en tablas y reportes
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Lógica de Autenticación y Navegación ---
-    // Lógica de Redirección
+    // ===================== AUTENTICACIÓN Y NAVEGACIÓN =====================
+    // Redirección según estado de sesión y página actual
     if (loginForm) {
-        // ... Tu código de login ...
+        // Aquí va la lógica de login (más abajo)
     }
 
     if (window.location.pathname === '/dashboard') {
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Botón Cerrar Sesión
+    // ===================== CERRAR SESIÓN =====================
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.clear();
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Lógica del formulario de Login ---
+    // ===================== FORMULARIO DE LOGIN =====================
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Lógica del Dashboard ---
+    // ===================== DASHBOARD: BIENVENIDA Y SECCIONES =====================
     if (welcomeMessage) {
         welcomeMessage.textContent = `Bienvenido, ${currentUserEmail || 'Usuario'}`;
 
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Lógica de Asistencia del Empleado ---
+    // ===================== ASISTENCIA DEL EMPLEADO =====================
     if (currentUserRole === 'employee') {
         if (entradaBtn) {
             entradaBtn.addEventListener('click', async () => {
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Lógica de Gestión de Usuarios (solo para Admin) ---
+    // ===================== GESTIÓN DE USUARIOS (ADMIN) =====================
     function loadUsersForAdmin() {
         if (!userTableBody) return;
         fetch('/api/users')
@@ -167,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Renderiza la tabla de usuarios en el panel de administración
     function renderUserTable(users) {
         userTableBody.innerHTML = '';
         if (users.length === 0) {
@@ -188,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Eventos para abrir modal de usuarios y gestionar usuarios
     if (currentUserRole === 'admin') {
         const userManagementTrigger = document.querySelector('[data-bs-target="#usuariosModal"]');
         if (userManagementTrigger) {
@@ -201,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Guardar o editar usuario
         if (userForm) {
             userForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -244,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Editar o eliminar usuario desde la tabla
         if (userTableBody) {
             userTableBody.addEventListener('click', async (e) => {
                 const target = e.target;
@@ -293,8 +297,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Lógica de Reportes (solo para Admin) ---
+    // ===================== REPORTES (ADMIN) =====================
     if (currentUserRole === 'admin') {
+        // Función para cargar reportes desde el backend
         const loadReport = async (endpoint, title) => {
             if (!reportOutputDiv) return;
             try {
@@ -312,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+        // Botones para generar reportes
         if (reporteAtrasosBtn) {
             reporteAtrasosBtn.addEventListener('click', () => loadReport('late-entries', 'Reporte de Entradas Atrasadas'));
         }
@@ -322,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reporteInasistenciasBtn.addEventListener('click', () => loadReport('absences', 'Reporte de Inasistencias'));
         }
 
+        // Muestra los datos del reporte en una tabla
         const displayReport = (title, data) => {
             reportOutputDiv.innerHTML = `<h3>${title}</h3>`;
             if (!data || data.length === 0) {
@@ -360,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- Inicialización Adicional ---
+    // ===================== INICIALIZACIÓN ADICIONAL =====================
     const initModals = () => {
         // Ya se inicializaron arriba con new bootstrap.Modal(...)
     };

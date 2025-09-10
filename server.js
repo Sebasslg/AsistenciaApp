@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const { User, sequelize } = require('./models'); // Modelo y instancia de Sequelize
 
-// -------------------- CONFIG --------------------
+// -------------------- CONFIGURACIÓN --------------------
 const app = express();
 const port = 3004;
 
@@ -15,19 +15,21 @@ app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// -------------------- RUTAS VISTAS --------------------
+// -------------------- RUTAS DE VISTAS --------------------
+
+// Ruta principal: Login
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
+// Ruta dashboard (puedes agregar validación de sesión aquí)
 app.get('/dashboard', (req, res) => {
-    // Aquí se podría validar sesión del usuario
     res.sendFile(path.join(__dirname, 'views', 'dashboard.html'));
 });
 
 // -------------------- RUTAS API --------------------
 
-// Login
+// ----------- LOGIN -----------
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -43,7 +45,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// -------------------- RUTAS USUARIOS (Admin) --------------------
+// ----------- USUARIOS (ADMIN) -----------
 
 // Obtener todos los usuarios (sin contraseña)
 app.get('/api/users', async (req, res) => {
@@ -58,7 +60,7 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-// Crear usuario (GU-01)
+// Crear usuario
 app.post('/api/users', async (req, res) => {
     const { email, password, role } = req.body;
     try {
@@ -74,7 +76,7 @@ app.post('/api/users', async (req, res) => {
     }
 });
 
-// Modificar usuario (GU-02)
+// Modificar usuario
 app.put('/api/users/:id', async (req, res) => {
     const userId = req.params.id;
     const { email, password, role } = req.body;
@@ -96,7 +98,7 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
-// Eliminar usuario (GU-03)
+// Eliminar usuario
 app.delete('/api/users/:id', async (req, res) => {
     const userId = req.params.id;
     try {
@@ -113,9 +115,10 @@ app.delete('/api/users/:id', async (req, res) => {
 
 // -------------------- RUTAS REPORTES --------------------
 
-// Reporte de Entradas Atrasadas (RE-01)
+// Reporte de Entradas Atrasadas
 app.get('/api/reports/late-entries', async (req, res) => {
     try {
+        // Simulación de datos
         const simulatedData = [
             { userId: 1, email: 'empleado1@empresa.com', entryTime: '2025-09-10T09:45:00Z' },
             { userId: 2, email: 'empleado2@empresa.com', entryTime: '2025-09-10T10:05:00Z' },
@@ -127,9 +130,10 @@ app.get('/api/reports/late-entries', async (req, res) => {
     }
 });
 
-// Reporte de Salidas Anticipadas (RE-02)
+// Reporte de Salidas Anticipadas
 app.get('/api/reports/early-exits', async (req, res) => {
     try {
+        // Simulación de datos
         const simulatedData = [
             { userId: 1, email: 'empleado1@empresa.com', exitTime: '2025-09-10T17:15:00Z' },
         ];
@@ -140,9 +144,10 @@ app.get('/api/reports/early-exits', async (req, res) => {
     }
 });
 
-// Reporte de Inasistencias (RE-03)
+// Reporte de Inasistencias
 app.get('/api/reports/absences', async (req, res) => {
     try {
+        // Simulación de datos
         const simulatedData = [
             { userId: 3, email: 'empleado3@empresa.com', date: '2025-09-10' },
         ];
@@ -156,11 +161,11 @@ app.get('/api/reports/absences', async (req, res) => {
 // -------------------- INICIAR SERVIDOR --------------------
 sequelize.sync()
     .then(() => {
-        console.log(`✅ Base de datos conectada correctamente`);
+        console.log(`Base de datos conectada y sincronizada`);
         app.listen(port, () => {
-            console.log(`🚀 Servidor escuchando en http://localhost:${port}`);
+            console.log(`Servidor corriendo en:  http://localhost:${port}`);
         });
     })
     .catch(error => {
-        console.error('❌ Error al conectar a la base de datos:', error);
+        console.error(' Error al conectar a la base de datos:', error);
     });
