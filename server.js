@@ -2,62 +2,55 @@
 const express = require('express');
 const path = require('path');
 const { User, Attendance, sequelize, Sequelize } = require('./models');
-const { Op } = Sequelize; // <-- Agrega esto
+const { Op } = Sequelize;
 
 // -------------------- CONFIGURACIÓN --------------------
 const app = express();
 const port = 3004;
 
-// Horarios configurables según requerimientos
-const ENTRY_LIMIT = '09:30:00'; // Atrasos después de las 09:30
-const EXIT_LIMIT = '17:30:00';  // Salidas antes de las 17:30
-
-// Middleware para servir archivos estáticos (CSS, JS, Bootstrap)
+// Middleware para archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
-// Middleware para procesar datos de formularios y JSON
+// Middleware para parsear JSON y formularios
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // -------------------- RUTAS DE VISTAS --------------------
 
-// Ruta principal: Login
+// Login
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
-// Ruta dashboard (puedes agregar validación de sesión aquí)
+// Dashboard
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'dashboard.html'));
 });
 
 // -------------------- RUTAS API --------------------
 
-// ----------- LOGIN -----------
+// LOGIN
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ where: { email, password } });
         if (user) {
-            res.json({ success: true, message: 'Autenticación exitosa', role: user.role });
-        } else {
-            res.status(401).json({ success: false, message: 'Correo o contraseña incorrectos' });
+            return res.json({ success: true, message: 'Autenticación exitosa', role: user.role });
         }
+        res.status(401).json({ success: false, message: 'Correo o contraseña incorrectos' });
     } catch (error) {
         console.error('Error de autenticación:', error);
         res.status(500).json({ success: false, message: 'Error del servidor' });
     }
 });
 
-// ----------- USUARIOS (ADMIN) -----------
+// -------------------- USUARIOS (ADMIN) --------------------
 
-// Obtener todos los usuarios (sin contraseña)
+// Obtener usuarios
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await User.findAll({
-            attributes: { exclude: ['password'] }
-        });
+        const users = await User.findAll({ attributes: { exclude: ['password'] } });
         res.json(users);
     } catch (error) {
         console.error('Error al obtener usuarios:', error);
@@ -70,18 +63,18 @@ app.post('/api/users', async (req, res) => {
     const { email, password, role } = req.body;
     try {
         const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) return res.status(409).json({ success: false, message: 'El correo electrónico ya está en uso.' });
+        if (existingUser) return res.status(409).json({ success: false, message: 'Correo ya en uso.' });
 
         const newUser = await User.create({ email, password, role });
         const { password: _, ...userWithoutPassword } = newUser.get({ plain: true });
-        res.status(201).json({ success: true, message: 'Usuario creado exitosamente', user: userWithoutPassword });
+        res.status(201).json({ success: true, message: 'Usuario creado', user: userWithoutPassword });
     } catch (error) {
         console.error('Error al crear usuario:', error);
-        res.status(500).json({ success: false, message: 'Error al crear el usuario' });
+        res.status(500).json({ success: false, message: 'Error al crear usuario' });
     }
 });
 
-// Modificar usuario
+// Actualizar usuario
 app.put('/api/users/:id', async (req, res) => {
     const userId = req.params.id;
     const { email, password, role } = req.body;
@@ -91,15 +84,15 @@ app.put('/api/users/:id', async (req, res) => {
 
         if (email && email !== user.email) {
             const existingUser = await User.findOne({ where: { email } });
-            if (existingUser) return res.status(409).json({ success: false, message: 'El correo ya está en uso por otro usuario.' });
+            if (existingUser) return res.status(409).json({ success: false, message: 'Correo ya en uso' });
         }
 
         await user.update({ email, password, role });
         const { password: _, ...updatedUserWithoutPassword } = user.get({ plain: true });
-        res.json({ success: true, message: 'Usuario actualizado exitosamente', user: updatedUserWithoutPassword });
+        res.json({ success: true, message: 'Usuario actualizado', user: updatedUserWithoutPassword });
     } catch (error) {
         console.error('Error al actualizar usuario:', error);
-        res.status(500).json({ success: false, message: 'Error al actualizar el usuario' });
+        res.status(500).json({ success: false, message: 'Error al actualizar usuario' });
     }
 });
 
@@ -111,78 +104,64 @@ app.delete('/api/users/:id', async (req, res) => {
         if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
 
         await user.destroy();
-        res.json({ success: true, message: 'Usuario eliminado exitosamente' });
+        res.json({ success: true, message: 'Usuario eliminado' });
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
-        res.status(500).json({ success: false, message: 'Error al eliminar el usuario' });
+        res.status(500).json({ success: false, message: 'Error al eliminar usuario' });
     }
 });
 
-// -------------------- RUTAS REPORTES --------------------
+// -------------------- REPORTES --------------------
 
-// Reporte de Entradas Atrasadas (RE-01)
+// Entradas atrasadas
 app.get('/api/reports/late-entries', async (req, res) => {
     try {
         const today = new Date().toISOString().slice(0, 10);
-        const entryLimit = new Date(`${today}T${ENTRY_LIMIT}`);
         const lateEntries = await Attendance.findAll({
             where: {
                 type: 'entrada',
-                timestamp: {
-                    [Op.gt]: entryLimit
-                }
+                timestamp: { [Op.gt]: new Date(`${today}T09:00:00`) }
             },
-            include: [{ model: User, as: 'user', attributes: ['id', 'email'] }]
+            include: [{ model: User, as: 'user', attributes: ['email'] }]
         });
 
-        const result = lateEntries.map(a => ({
-            userId: a.user.id,
-            email: a.user.email,
-            entryTime: a.timestamp
-        }));
-
+        const result = lateEntries.map(a => ({ email: a.user.email, entryTime: a.timestamp }));
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al generar reporte de atrasos' });
+        console.error('Error reporte atrasos:', error);
+        res.status(500).json({ success: false, message: 'Error al generar reporte' });
     }
 });
 
-// Reporte de Salidas Anticipadas (RE-02)
+// Salidas anticipadas
 app.get('/api/reports/early-exits', async (req, res) => {
     try {
         const today = new Date().toISOString().slice(0, 10);
-        const exitLimit = new Date(`${today}T${EXIT_LIMIT}`);
         const earlyExits = await Attendance.findAll({
             where: {
                 type: 'salida',
-                timestamp: {
-                    [Op.lt]: exitLimit
-                }
+                timestamp: { [Op.lt]: new Date(`${today}T18:00:00`) }
             },
-            include: [{ model: User, as: 'user', attributes: ['id', 'email'] }]
+            include: [{ model: User, as: 'user', attributes: ['email'] }]
         });
 
-        const result = earlyExits.map(a => ({
-            userId: a.user.id,
-            email: a.user.email,
-            exitTime: a.timestamp
-        }));
-
+        const result = earlyExits.map(a => ({ email: a.user.email, exitTime: a.timestamp }));
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al generar reporte de salidas anticipadas' });
+        console.error('Error reporte salidas:', error);
+        res.status(500).json({ success: false, message: 'Error al generar reporte' });
     }
 });
 
-// Reporte de Inasistencias (RE-03)
+// Inasistencias
 app.get('/api/reports/absences', async (req, res) => {
     try {
-        const users = await User.findAll({ attributes: ['id', 'email'], where: { role: 'employee' } });
+        const users = await User.findAll();
         const today = new Date().toISOString().slice(0, 10);
 
-        // Busca quienes no tienen entrada ni salida hoy
-        const attendancesToday = await Attendance.findAll({
+        const entriesToday = await Attendance.findAll({
             where: {
+                type: 'entrada',
                 timestamp: {
                     [Op.gte]: new Date(`${today}T00:00:00`),
                     [Op.lt]: new Date(`${today}T23:59:59`)
@@ -190,22 +169,18 @@ app.get('/api/reports/absences', async (req, res) => {
             }
         });
 
-        const presentUserIds = [...new Set(attendancesToday.map(a => a.userId))];
+        const presentUserIds = entriesToday.map(a => a.userId);
         const absents = users.filter(u => !presentUserIds.includes(u.id));
 
-        const result = absents.map(u => ({
-            userId: u.id,
-            email: u.email,
-            date: today
-        }));
-
+        const result = absents.map(u => ({ email: u.email, date: today }));
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al generar reporte de inasistencias' });
+        console.error('Error reporte inasistencias:', error);
+        res.status(500).json({ success: false, message: 'Error al generar reporte' });
     }
 });
 
-// ----------- ASISTENCIA -----------
+// -------------------- ASISTENCIA --------------------
 
 // Registrar asistencia
 app.post('/api/attendance', async (req, res) => {
@@ -214,11 +189,7 @@ app.post('/api/attendance', async (req, res) => {
         const user = await User.findOne({ where: { email } });
         if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
 
-        const attendance = await Attendance.create({
-            userId: user.id,
-            type,
-            timestamp: new Date()
-        });
+        const attendance = await Attendance.create({ userId: user.id, type, timestamp: new Date() });
         res.json({ success: true, attendance });
     } catch (error) {
         console.error('Error registrando asistencia:', error);
@@ -226,7 +197,7 @@ app.post('/api/attendance', async (req, res) => {
     }
 });
 
-// Obtener última marca
+// Última marca
 app.get('/api/attendance/last/:email', async (req, res) => {
     const { email } = req.params;
     try {
@@ -241,6 +212,7 @@ app.get('/api/attendance/last/:email', async (req, res) => {
             where: { userId: user.id, type: 'salida' },
             order: [['timestamp', 'DESC']]
         });
+
         res.json({
             success: true,
             lastEntry: lastEntry ? lastEntry.timestamp : null,
@@ -255,11 +227,11 @@ app.get('/api/attendance/last/:email', async (req, res) => {
 // -------------------- INICIAR SERVIDOR --------------------
 sequelize.sync()
     .then(() => {
-        console.log(`Base de datos conectada y sincronizada`);
+        console.log('Base de datos conectada y sincronizada');
         app.listen(port, () => {
-            console.log(`Servidor corriendo en:  http://localhost:${port}`);
+            console.log(`Servidor corriendo en http://localhost:${port}`);
         });
     })
     .catch(error => {
-        console.error(' Error al conectar a la base de datos:', error);
+        console.error('Error al conectar a la base de datos:', error);
     });
