@@ -3,12 +3,9 @@ const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Asociaciones entre modelos
-     */
+    
     static associate(models) {
-      // Por ejemplo, si luego agregas tabla Attendance
-      // User.hasMany(models.Attendance, { foreignKey: 'userId' });
+      
     }
   }
 
@@ -42,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
-    tableName: 'Users', // Nombre explícito de la tabla
+    tableName: 'Users', // Nombre  de la tabla
     timestamps: true,   // createdAt y updatedAt
   });
 

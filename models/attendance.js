@@ -4,8 +4,7 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Attendance extends Model {
     static associate(models) {
-      // Asociación hecha en index.js
-      // User.hasMany(Attendance) y Attendance.belongsTo(User)
+     
     }
   }
 
