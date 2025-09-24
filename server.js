@@ -70,7 +70,7 @@ app.post('/api/users', async (req, res) => {
         res.status(201).json({ success: true, message: 'Usuario creado', user: userWithoutPassword });
     } catch (error) {
         console.error('Error al crear usuario:', error);
-        res.status(500).json({ success: false, message: 'Error al crear usuario' });
+        res.status(500).json({ success: false, message: 'Error al crear usuario' });;
     }
 });
 
@@ -108,6 +108,17 @@ app.delete('/api/users/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
         res.status(500).json({ success: false, message: 'Error al eliminar usuario' });
+    }
+});
+
+// Obtener usuario por ID
+app.get('/api/users/:id', async (req, res) => {
+    try {
+        const user = await User.findByPk(req.params.id);
+        if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error al obtener usuario' });
     }
 });
 
@@ -153,10 +164,11 @@ app.get('/api/reports/early-exits', async (req, res) => {
     }
 });
 
-// Inasistencias
+// Inasistencias (solo empleados)
 app.get('/api/reports/absences', async (req, res) => {
     try {
-        const users = await User.findAll();
+        // Solo empleados
+        const users = await User.findAll({ where: { role: 'employee' } });
         const today = new Date().toISOString().slice(0, 10);
 
         const entriesToday = await Attendance.findAll({

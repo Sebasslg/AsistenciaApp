@@ -10,7 +10,7 @@ module.exports = {
     }, {
       email: 'empleado@empresa.com',
       password: '1234',
-      role: 'empleado',
+      role: 'employee', 
       createdAt: new Date(),
       updatedAt: new Date()
     }], {});
