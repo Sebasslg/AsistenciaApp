@@ -7,18 +7,24 @@ const process = require('process');
 
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+const config = require(__dirname + '/../config/config.js')[env];
 
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+// Crear la conexión Sequelize
+const sequelize = new Sequelize(
+  config.database,
+  config.username,
+  config.password,
+  {
+    host: config.host,
+    port: config.port,
+    dialect: config.dialect,
+    logging: false, // Cambia a true si quieres ver queries SQL
+  }
+);
 
-// ===================== CARGA DE MODELOS =====================
+// ===================== CARGA AUTOMÁTICA DE MODELOS =====================
 fs
   .readdirSync(__dirname)
   .filter(file => {
@@ -41,7 +47,7 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
-// Asocia usuarios con asistencias
+// Ejemplo de asociación User → Attendance
 if (db.User && db.Attendance) {
   db.User.hasMany(db.Attendance, { foreignKey: 'userId', as: 'attendances' });
   db.Attendance.belongsTo(db.User, { foreignKey: 'userId', as: 'user' });

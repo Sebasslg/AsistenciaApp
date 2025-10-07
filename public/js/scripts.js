@@ -1,46 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+
+
     // ===================== ELEMENTOS DEL DOM =====================
-    const loginForm = document.getElementById('login-form');
-    const errorMessage = document.getElementById('error-message');
-    const logoutBtn = document.getElementById('logout-btn');
-    const welcomeMessage = document.getElementById('welcome-message');
-    const employeeSection = document.getElementById('employee-section');
-    const adminSection = document.getElementById('admin-section');
-    const entradaBtn = document.getElementById('entrada-btn');
-    const salidaBtn = document.getElementById('salida-btn');
+    const getDomElements = () => ({
+        loginForm: document.getElementById('login-form'),
+        errorMessage: document.getElementById('error-message'),
+        logoutBtn: document.getElementById('logout-btn'),
+        welcomeMessage: document.getElementById('welcome-message'),
+        employeeSection: document.getElementById('employee-section'),
+        adminSection: document.getElementById('admin-section'),
+        entradaBtn: document.getElementById('entrada-btn'),
+        salidaBtn: document.getElementById('salida-btn'),
+        usuariosModalElement: document.getElementById('usuariosModal'),
+        userForm: document.getElementById('user-form'),
+        userIdInput: document.getElementById('user-id'),
+        userEmailInput: document.getElementById('user-email'),
+        userPasswordInput: document.getElementById('user-password'),
+        userRoleInput: document.getElementById('user-role'),
+        userFormTitle: document.getElementById('user-form-title'),
+        userTableBody: document.getElementById('user-table-body'),
+        reportesModalElement: document.getElementById('reportesModal'),
+        reporteAtrasosBtn: document.getElementById('reporte-atrasos-btn'),
+        reporteSalidasBtn: document.getElementById('reporte-salidas-btn'),
+        reporteInasistenciasBtn: document.getElementById('reporte-inasistencias-btn'),
+        reportOutputDiv: document.getElementById('report-output'),
+    });
 
-    // Modales para gestión de usuarios y reportes
-    const usuariosModalElement = document.getElementById('usuariosModal');
-    let usuariosModal = null;
-    if (usuariosModalElement) {
-        usuariosModal = new bootstrap.Modal(usuariosModalElement);
-    }
+    // ===================== SESIÓN =====================
+    const getSession = () => ({
+        currentUserRole: localStorage.getItem('userRole'),
+        currentUserEmail: localStorage.getItem('userEmail'),
+    });
 
-    const userForm = document.getElementById('user-form');
-    const userIdInput = document.getElementById('user-id');
-    const userEmailInput = document.getElementById('user-email');
-    const userPasswordInput = document.getElementById('user-password');
-    const userRoleInput = document.getElementById('user-role');
-    const userFormTitle = document.getElementById('user-form-title');
-    const userTableBody = document.getElementById('user-table-body');
+    const setSession = (role, email) => {
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('userEmail', email);
+    };
 
-    const reportesModalElement = document.getElementById('reportesModal');
-    let reportesModal = null;
-    if (reportesModalElement) {
-        reportesModal = new bootstrap.Modal(reportesModalElement);
-    }
-
-    const reporteAtrasosBtn = document.getElementById('reporte-atrasos-btn');
-    const reporteSalidasBtn = document.getElementById('reporte-salidas-btn');
-    const reporteInasistenciasBtn = document.getElementById('reporte-inasistencias-btn');
-    const reportOutputDiv = document.getElementById('report-output');
-
-    // ===================== VARIABLES DE SESIÓN =====================
-    let currentUserRole = localStorage.getItem('userRole');
-    let currentUserEmail = localStorage.getItem('userEmail');
+    const clearSession = () => {
+        localStorage.clear();
+    };
 
     // ===================== FUNCIONES DE AYUDA =====================
-    // Formatea fechas para mostrar en tablas y reportes
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
@@ -53,52 +55,36 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===================== AUTENTICACIÓN Y NAVEGACIÓN =====================
-    // Redirección según estado de sesión y página actual
-    if (loginForm) {
-        // Aquí va la lógica de login (más abajo)
-    }
-
-    if (window.location.pathname === '/dashboard') {
-        if (!currentUserRole) {
+    const handleNavigation = () => {
+        const { currentUserRole } = getSession();
+        const path = window.location.pathname;
+        if (path === '/dashboard' && !currentUserRole) {
             window.location.href = '/';
-        }
-    } else {
-        if (currentUserRole) {
+        } else if (path === '/' && currentUserRole) {
             window.location.href = '/dashboard';
         }
-    }
+    };
 
-    // ===================== CERRAR SESIÓN =====================
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            localStorage.clear();
-            window.location.href = '/';
-        });
-    }
-
-    // ===================== FORMULARIO DE LOGIN =====================
-    if (loginForm) {
+    // ===================== LOGIN =====================
+    const handleLogin = (loginForm, errorMessage) => {
+        if (!loginForm) return;
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-
             if (!email || !password) {
                 if (errorMessage) errorMessage.textContent = 'Por favor, ingresa correo y contraseña.';
                 return;
             }
-
             try {
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-
                 const data = await response.json();
                 if (data.success) {
-                    localStorage.setItem('userRole', data.role);
-                    localStorage.setItem('userEmail', email);
+                    setSession(data.role, email);
                     window.location.href = '/dashboard';
                 } else {
                     if (errorMessage) errorMessage.textContent = data.message;
@@ -108,12 +94,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (errorMessage) errorMessage.textContent = 'Error de conexión. Intenta de nuevo.';
             }
         });
+    };
+
+    // ===================== LOGOUT =====================
+    const handleLogout = (logoutBtn) => {
+        if (!logoutBtn) return;
+        logoutBtn.addEventListener('click', () => {
+            clearSession();
+            window.location.href = '/';
+        });
+    };
+
+
+    // ===================== INICIALIZACIÓN =====================
+    const {
+        loginForm,
+        errorMessage,
+        logoutBtn,
+        welcomeMessage,
+        employeeSection,
+        adminSection,
+        entradaBtn,
+        salidaBtn,
+        usuariosModalElement,
+        userForm,
+        userIdInput,
+        userEmailInput,
+        userPasswordInput,
+        userRoleInput,
+        userFormTitle,
+        userTableBody,
+        reportesModalElement,
+        reporteAtrasosBtn,
+        reporteSalidasBtn,
+        reporteInasistenciasBtn,
+        reportOutputDiv
+    } = getDomElements();
+
+    // Inicializar usuariosModal correctamente para evitar errores
+    let usuariosModal = null;
+    if (usuariosModalElement) {
+        usuariosModal = bootstrap.Modal.getOrCreateInstance(usuariosModalElement);
     }
 
-    // ===================== DASHBOARD: BIENVENIDA Y SECCIONES =====================
-    if (welcomeMessage) {
-        welcomeMessage.textContent = `Bienvenido, ${currentUserEmail || 'Usuario'}`;
+    handleNavigation();
+    handleLogin(loginForm, errorMessage);
+    handleLogout(logoutBtn);
 
+    const { currentUserRole, currentUserEmail } = getSession();
+
+
+    // ===================== DASHBOARD: BIENVENIDA Y SECCIONES =====================
+    const showDashboardSections = () => {
+        if (!welcomeMessage) return;
+        welcomeMessage.textContent = `Bienvenido, ${currentUserEmail || 'Usuario'}`;
         if (currentUserRole === 'admin') {
             if (employeeSection) employeeSection.style.display = 'none';
             if (adminSection) adminSection.style.display = 'block';
@@ -126,7 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (adminSection) adminSection.style.display = 'none';
             welcomeMessage.textContent = 'Rol no reconocido. Por favor, cierra sesión y vuelve a iniciarla.';
         }
-    }
+    };
+    showDashboardSections();
 
     // Actualiza la última marca en la vista
     async function updateLastMarks(email) {
@@ -409,9 +444,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ===================== INICIALIZACIÓN ADICIONAL =====================
-    const initModals = () => {
-        // Ya se inicializaron arriba con new bootstrap.Modal(...)
-    };
-
-    initModals();
+    // Ya se inicializaron los modales arriba si existen
 });
